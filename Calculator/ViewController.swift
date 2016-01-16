@@ -14,6 +14,8 @@ class ViewController: UIViewController {
 
     var userIsInTheMiddleOfTypingNumber = false
     
+    var brain = CalculatorBrain()
+    
     @IBAction func appendDigit(sender: UIButton) {
         let digit = sender.currentTitle!
         if userIsInTheMiddleOfTypingNumber {
@@ -29,36 +31,20 @@ class ViewController: UIViewController {
         if userIsInTheMiddleOfTypingNumber {
             enter()
         }
-        switch operation {
-        case "×": performOperation { $0 * $1 }
-        case "÷": performOperation { $1 / $0 }
-        case "+": performOperation { $0 + $1 }
-        case "-": performOperation { $1 - $0 }
-        case "√": performOperation { sqrt($0) }
-        default: break
+        if let result = brain.performOperation(operation) {
+            displayValue = result
+        } else {
+            displayValue = 0
         }
     }
-    
-    private func performOperation(operation: (Double, Double) -> Double) {
-        if operandStack.count >= 2 {
-            displayValue = operation(operandStack.removeLast(), operandStack.removeLast())
-            enter()
-        }
-    }
-
-    private func performOperation(operation: Double -> Double) {
-        if operandStack.count >= 1 {
-            displayValue = operation(operandStack.removeLast())
-            enter()
-        }
-    }
-    
-    var operandStack = Array<Double>()
     
     @IBAction func enter() {
         userIsInTheMiddleOfTypingNumber = false
-        operandStack.append(displayValue)
-        print("\(operandStack)")
+        if let result = brain.pushOperand(displayValue) {
+            displayValue = result
+        } else {
+            displayValue = 0
+        }
     }
  
     var displayValue: Double {
