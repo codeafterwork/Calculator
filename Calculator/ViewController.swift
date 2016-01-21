@@ -11,6 +11,7 @@ import UIKit
 class ViewController: UIViewController {
 
     @IBOutlet weak var display: UILabel!
+    @IBOutlet weak var history: UILabel!
 
     var userIsInTheMiddleOfTypingNumber = false
     
@@ -19,9 +20,15 @@ class ViewController: UIViewController {
     @IBAction func appendDigit(sender: UIButton) {
         let digit = sender.currentTitle!
         if userIsInTheMiddleOfTypingNumber {
-            display.text = display.text! + digit
+            if digit !=  "." || (digit == "." && display.text!.rangeOfString(".") == nil) {
+                display.text = display.text! + digit
+            }
         } else {
-            display.text = digit
+            if digit == "." {
+                display.text = "0" + digit
+            } else {
+                display.text = digit
+            }
             userIsInTheMiddleOfTypingNumber = true
         }
     }
@@ -31,22 +38,47 @@ class ViewController: UIViewController {
         if userIsInTheMiddleOfTypingNumber {
             enter()
         }
-        if let result = brain.performOperation(operation) {
-            displayValue = result
+        let (result, stack) = brain.performOperation(operation)
+        if result != nil {
+            displayValue = result!
         } else {
             displayValue = 0
         }
+        history.text = stack
     }
     
     @IBAction func enter() {
         userIsInTheMiddleOfTypingNumber = false
-        if let result = brain.pushOperand(displayValue) {
-            displayValue = result
+        let (result, stack) = brain.pushOperand(displayValue)
+        if result != nil  {
+            displayValue = result!
         } else {
             displayValue = 0
         }
+        history.text = stack
     }
  
+    @IBAction func enterConstant(sender: UIButton) {
+        let constant = sender.currentTitle!
+        if userIsInTheMiddleOfTypingNumber {
+            enter()
+        }
+        let (result, stack) = brain.pushConstant(constant)
+        if result != nil {
+            displayValue = result!
+        } else {
+            displayValue = 0
+        }
+        history.text = stack
+    }
+    
+    @IBAction func clear(sender: UIButton) {
+        brain.reset()
+        displayValue = 0
+        history.text = nil
+        userIsInTheMiddleOfTypingNumber = false
+    }
+    
     var displayValue: Double {
         get {
             return NSNumberFormatter().numberFromString(display.text!)!.doubleValue
