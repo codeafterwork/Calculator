@@ -43,9 +43,7 @@ class ViewController: UIViewController {
     
     @IBAction func enter() {
         userIsInTheMiddleOfTypingNumber = false
-        let (result, stack) = brain.pushOperand(displayValue!)
-        displayValue = result
-        history.text = stack
+        displayValue = brain.pushOperand(displayValue!)
     }
  
     @IBAction func enterConstant(sender: UIButton) {
@@ -53,9 +51,7 @@ class ViewController: UIViewController {
         if userIsInTheMiddleOfTypingNumber {
             enter()
         }
-        let (result, stack) = brain.pushConstant(constant)
-        displayValue = result
-        history.text = stack
+        displayValue = brain.pushConstant(constant)
     }
     
     @IBAction func clear(sender: UIButton) {
@@ -91,7 +87,7 @@ class ViewController: UIViewController {
     }
 
     private func perform(operation: String) {
-        let (result, stack) = brain.performOperation(operation)
+        let result = brain.performOperation(operation)
         if result != nil {
             displayValue = result!
             if let displayText = display.text {
@@ -102,7 +98,6 @@ class ViewController: UIViewController {
         } else {
             displayValue = 0
         }
-        history.text = stack
     }
     
     var displayValue: Double? {
@@ -116,7 +111,23 @@ class ViewController: UIViewController {
                 display.text = ""
             }
             userIsInTheMiddleOfTypingNumber = false
+            history.text = brain.description
         }
+    }
+    
+    @IBAction func setM() {
+        if let value = displayValue {
+            userIsInTheMiddleOfTypingNumber = false
+            brain.variableValues["M"] = value
+            displayValue = brain.evaluate()
+        }
+    }
+    
+    @IBAction func getM() {
+        if userIsInTheMiddleOfTypingNumber {
+            enter()
+        }
+        displayValue = brain.pushOperand("M")
     }
 }
 
